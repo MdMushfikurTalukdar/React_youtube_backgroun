@@ -1,5 +1,7 @@
 import { Link } from "@mui/material";
 import React, { useEffect } from "react";
+import YoutubeButton from './component/YoutubeButton';
+
 
 function App() {
   // Function to load a script dynamically
@@ -48,10 +50,9 @@ function App() {
 
   return (
     <div>
-
-<script async="async" data-cfasync="false" src="//pl25785213.effectiveratecpm.com/e28dc6067e4236563bbed735b8ab040c/invoke.js"></script>
-<div id="container-e28dc6067e4236563bbed735b8ab040c"></div>
-
+      {/* Ad Scripts */}
+      <script async="async" data-cfasync="false" src="//pl25785213.effectiveratecpm.com/e28dc6067e4236563bbed735b8ab040c/invoke.js"></script>
+      <div id="container-e28dc6067e4236563bbed735b8ab040c"></div>
 
       {/* Ad 1: Loads script */}
       <Link component="button" onClick={() => alert("Ad 1 Clicked!")}>
@@ -63,19 +64,8 @@ function App() {
         <button>Ads 2</button>
       </Link>
 
-      {/* Placeholder functions for other ads */}
-      <Link component="button" onClick={() => alert("Ad 3 Clicked!")}>
-        <button>Ads 3</button>
-      </Link>
-      <Link component="button" onClick={() => alert("Ad 4 Clicked!")}>
-        <button>Ads 4</button>
-      </Link>
-      <Link component="button" onClick={() => alert("Ad 5 Clicked!")}>
-        <button>Ads 5</button>
-      </Link>
-      <Link component="button" onClick ={() => alert("Ad 6 Clicked!")}>
-        <button>Ads 6</button>
-      </Link>
+      {/* YouTube Button */}
+      <YoutubeButton />
     </div>
   );
 }
