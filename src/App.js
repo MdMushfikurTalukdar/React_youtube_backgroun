@@ -1,7 +1,31 @@
 import { Link } from "@mui/material";
 import React, { useEffect } from "react";
-import YoutubeButton from './component/YoutubeButton';
+import Button from '@mui/material/Button'; // <-- Added this import
 
+// YouTube Button Component
+const YoutubeButton = () => { // <-- Added this component
+  const handleClick = () => {
+    // Open YouTube in a new tab
+    window.open('https://www.youtube.com', '_blank');
+  };
+
+  return (
+    <Button
+      variant="contained"
+      color="error"
+      onClick={handleClick}
+      startIcon={
+        <img
+          src="https://www.youtube.com/favicon.ico"
+          alt="YouTube Icon"
+          style={{ width: '24px', height: '24px' }}
+        />
+      }
+    >
+      YouTube
+    </Button>
+  );
+};
 
 function App() {
   // Function to load a script dynamically
@@ -65,7 +89,7 @@ function App() {
       </Link>
 
       {/* YouTube Button */}
-      <YoutubeButton />
+      <YoutubeButton /> {/* <-- Added this line */}
     </div>
   );
 }
