@@ -38,7 +38,7 @@ const Navbar = () => {
     <AppBar position="static" sx={{ backgroundColor: "#1e1e1e" }}>
       <Toolbar>
         {/* Logo */}
-        <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" color="inherit" style={{ textDecoration: 'none' }} component={Link} to="/" sx={{ flexGrow: 1 }}>
           MyApp
         </Typography>
 
@@ -51,8 +51,8 @@ const Navbar = () => {
 
         {/* Live Draw Option (Desktop) */}
         {!isMobile && (
-          <Button color="inherit" component={Link} to="/live-draw">
-            Live Draw
+          <Button color="inherit" component={Link} to="/image-converter">
+            Image Converter
           </Button>
         )}
 
@@ -87,8 +87,8 @@ const Navbar = () => {
               <MenuItem component={Link} to="/fun" onClick={handleMenuClose}>
                 Fun
               </MenuItem>
-              <MenuItem component={Link} to="/live-draw" onClick={handleMenuClose}>
-                Live Draw
+              <MenuItem component={Link} to="/image-converter" onClick={handleMenuClose}>
+                Image Converter
               </MenuItem>
               <MenuItem onClick={handleYouTubeClick}>
                 <YouTubeIcon sx={{ marginRight: 1 }} />

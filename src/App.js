@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./component//Navbar";
 import Homepage from "./pages/Homepage";
 import FunDashboard from "./pages/FunDashboard";
+import ImageConverter from './pages/ImageConverter';
 
 function App() {
   // Function to load a script dynamically
@@ -59,6 +60,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/fun" element={<FunDashboard />} />
+          <Route path="/image-converter" element={<ImageConverter />} />
         </Routes>
 
         {/* Ad Scripts */}
