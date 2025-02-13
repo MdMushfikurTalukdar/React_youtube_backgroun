@@ -1,31 +1,8 @@
-import { Link } from "@mui/material";
 import React, { useEffect } from "react";
-import Button from '@mui/material/Button'; // <-- Added this import
-
-// YouTube Button Component
-const YoutubeButton = () => { // <-- Added this component
-  const handleClick = () => {
-    // Open YouTube in a new tab
-    window.open('https://www.youtube.com', '_blank');
-  };
-
-  return (
-    <Button
-      variant="contained"
-      color="error"
-      onClick={handleClick}
-      startIcon={
-        <img
-          src="https://www.youtube.com/favicon.ico"
-          alt="YouTube Icon"
-          style={{ width: '24px', height: '24px' }}
-        />
-      }
-    >
-      YouTube
-    </Button>
-  );
-};
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./component//Navbar";
+import Homepage from "./pages/Homepage";
+import FunDashboard from "./pages/FunDashboard";
 
 function App() {
   // Function to load a script dynamically
@@ -73,24 +50,22 @@ function App() {
   }, []);
 
   return (
-    <div>
-      {/* Ad Scripts */}
-      <script async="async" data-cfasync="false" src="//pl25785213.effectiveratecpm.com/e28dc6067e4236563bbed735b8ab040c/invoke.js"></script>
-      <div id="container-e28dc6067e4236563bbed735b8ab040c"></div>
+    <Router>
+      <div>
+        {/* Navbar */}
+        <Navbar />
 
-      {/* Ad 1: Loads script */}
-      <Link component="button" onClick={() => alert("Ad 1 Clicked!")}>
-        <button>Ads 1</button>
-      </Link>
+        {/* Routes */}
+        <Routes>
+          <Route path="/" element={<Homepage />} />
+          <Route path="/fun" element={<FunDashboard />} />
+        </Routes>
 
-      {/* Ad 2: Redirects to the given ad link */}
-      <Link href="https://www.profitablecpmrate.com/s0cguj5s5?key=f550db3c8fb7e997a8e06fba664fedbb" target="_blank">
-        <button>Ads 2</button>
-      </Link>
-
-      {/* YouTube Button */}
-      <YoutubeButton /> {/* <-- Added this line */}
-    </div>
+        {/* Ad Scripts */}
+        <script async="async" data-cfasync="false" src="//pl25785213.effectiveratecpm.com/e28dc6067e4236563bbed735b8ab040c/invoke.js"></script>
+        <div id="container-e28dc6067e4236563bbed735b8ab040c"></div>
+      </div>
+    </Router>
   );
 }
 
