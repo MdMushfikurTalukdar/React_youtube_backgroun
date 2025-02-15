@@ -4,6 +4,7 @@ import Navbar from "./component//Navbar";
 import Homepage from "./pages/Homepage";
 import FunDashboard from "./pages/FunDashboard";
 import ImageConverter from './pages/ImageConverter';
+import VideoConverter from './pages/VideoConverter';
 
 function App() {
   // Function to load a script dynamically
@@ -61,6 +62,7 @@ function App() {
           <Route path="/" element={<Homepage />} />
           <Route path="/fun" element={<FunDashboard />} />
           <Route path="/image-converter" element={<ImageConverter />} />
+          <Route path="/video-converter" element={<VideoConverter />} />
         </Routes>
 
         {/* Ad Scripts */}

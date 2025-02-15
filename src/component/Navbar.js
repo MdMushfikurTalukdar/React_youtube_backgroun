@@ -56,6 +56,12 @@ const Navbar = () => {
           </Button>
         )}
 
+        {!isMobile && (
+          <Button color="inherit" component={Link} to="/video-converter">
+            Video Converter
+          </Button>
+        )}
+
         {/* YouTube Button (Desktop) */}
         {!isMobile && (
           <Button
@@ -89,6 +95,9 @@ const Navbar = () => {
               </MenuItem>
               <MenuItem component={Link} to="/image-converter" onClick={handleMenuClose}>
                 Image Converter
+              </MenuItem>
+              <MenuItem component={Link} to="/video-converter" onClick={handleMenuClose}>
+                Video Converter
               </MenuItem>
               <MenuItem onClick={handleYouTubeClick}>
                 <YouTubeIcon sx={{ marginRight: 1 }} />

@@ -5,6 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@ffmpeg/ffmpeg": "^0.12.15",
     "@mui/icons-material": "^6.4.4",
     "@mui/material": "^6.4.4",
     "@tensorflow-models/coco-ssd": "^2.2.3",
@@ -12,6 +13,9 @@
     "cra-template": "1.2.0",
     "fabric": "^6.5.4",
     "face-api.js": "^0.22.2",
+    "file-saver": "^2.0.5",
+    "html2canvas": "^1.4.1",
+    "jszip": "^3.10.1",
     "peerjs": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
