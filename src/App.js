@@ -5,6 +5,7 @@ import Homepage from "./pages/Homepage";
 import FunDashboard from "./pages/FunDashboard";
 import ImageConverter from './pages/ImageConverter';
 import VideoConverter from './pages/VideoConverter';
+import MusicMaker from './pages/MusicMaker';
 
 function App() {
   // Function to load a script dynamically
@@ -63,6 +64,7 @@ function App() {
           <Route path="/fun" element={<FunDashboard />} />
           <Route path="/image-converter" element={<ImageConverter />} />
           <Route path="/video-converter" element={<VideoConverter />} />
+          <Route path="/music-maker" element={<MusicMaker />} />
         </Routes>
 
         {/* Ad Scripts */}
