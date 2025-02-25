@@ -3,8 +3,8 @@ import { Container, Typography, Button, Box } from "@mui/material";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import UploadIcon from "@mui/icons-material/Upload";
 import StopIcon from "@mui/icons-material/Stop";
-import * as faceapi from "face-api.js";
-import * as cocoSsd from "@tensorflow-models/coco-ssd";
+// import * as faceapi from "face-api.js";
+// import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs"; // Import TensorFlow.js
 
 const FunDashboard = () => {
@@ -22,15 +22,15 @@ const FunDashboard = () => {
     const loadModels = async () => {
       try {
         console.log("Loading models...");
-        await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
-        await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
-        await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
+        // await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+        // await faceapi.nets.faceLandmark68Net.loadFromUri("/models");
+        // await faceapi.nets.faceRecognitionNet.loadFromUri("/models");
         setModelsLoaded(true);
         console.log("Face models loaded successfully!");
 
         // Load COCO-SSD model for object detection
-        const model = await cocoSsd.load();
-        setCocoModel(model);
+        // const model = await cocoSsd.load();
+        // setCocoModel(model);
         console.log("COCO-SSD model loaded successfully!");
       } catch (error) {
         console.error("Error loading models:", error);
@@ -100,14 +100,14 @@ const FunDashboard = () => {
 
     try {
       console.log("Detecting faces...");
-      const img = await faceapi.fetchImage(image);
-      const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions());
+      // const img = await faceapi.fetchImage(image);
+      // const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions());
 
-      if (detections.length > 0) {
-        setFaceDetected("Face Detected!");
-      } else {
-        setFaceDetected("No Face Detected.");
-      }
+      // if (detections.length > 0) {
+      //   setFaceDetected("Face Detected!");
+      // } else {
+      //   setFaceDetected("No Face Detected.");
+      // }
     } catch (error) {
       console.error("Error detecting faces:", error);
       setFaceDetected("Error detecting faces.");

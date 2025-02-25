@@ -68,6 +68,12 @@ const Navbar = () => {
           </Button>
         )}
 
+        {!isMobile && (
+          <Button color="inherit" component={Link} to="/text-to-speech">
+            Text To Speech
+          </Button>
+        )}
+
         {/* YouTube Button (Desktop) */}
         {!isMobile && (
           <Button
@@ -107,6 +113,9 @@ const Navbar = () => {
               </MenuItem>
               <MenuItem component={Link} to="/music-maker" onClick={handleMenuClose}>
                 Music Maker
+              </MenuItem>
+              <MenuItem component={Link} to="/text-to-speech" onClick={handleMenuClose}>
+                Text To Speech
               </MenuItem>
               <MenuItem onClick={handleYouTubeClick}>
                 <YouTubeIcon sx={{ marginRight: 1 }} />
