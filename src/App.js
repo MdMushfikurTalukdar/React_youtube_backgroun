@@ -7,6 +7,10 @@ import ImageConverter from './pages/ImageConverter';
 import VideoConverter from './pages/VideoConverter';
 import MusicMaker from './pages/MusicMaker';
 import TextToSpeech from './pages/TextToSpeech';
+import DownloadVideo from './pages/DownloadVideo';
+import InstagramDownloader from './pages/InstagramDownloader';
+import AutoReply from './pages/AutoReply';
+import BlogPage from './pages/BlogPage';
 
 function App() {
   // Function to load a script dynamically
@@ -67,6 +71,10 @@ function App() {
           <Route path="/video-converter" element={<VideoConverter />} />
           <Route path="/music-maker" element={<MusicMaker />} />
           <Route path="/text-to-speech" element={<TextToSpeech />}/>
+          <Route path="/download-video" element={<DownloadVideo />} />
+          <Route path="/instagram-downloader" element={<InstagramDownloader />} />
+          <Route path="/auto-reply" element={<AutoReply />} />
+          <Route path="/blog" element={<BlogPage />} />
         </Routes>
 
         {/* Ad Scripts */}
