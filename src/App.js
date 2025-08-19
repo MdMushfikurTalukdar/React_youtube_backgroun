@@ -15,43 +15,67 @@ import BlogPage from './pages/BlogPage';
 function App() {
   useEffect(() => {
     const loadAdScripts = () => {
-      // Ad 1 (Original)
-      const script1 = document.createElement('script');
-      script1.src = '//pl27451996.profitableratecpm.com/04/9b/58/049b58bb8f039a484550d1e4845528c8.js';
-      script1.async = true;
+      try {
+        // Create container for 3rd ad FIRST
+        const adContainer = document.createElement('div');
+        adContainer.id = 'container-461148cde71dd8c3586e2a95af4919d5';
+        document.body.appendChild(adContainer);
 
-      // Ad 2 (Second Ad)
-      const script2 = document.createElement('script');
-      script2.src = '//pl27453451.profitableratecpm.com/f0/3a/a0/f03aa033bc9cb942a5fb91344c04656b.js';
-      script2.async = true;
+        // Ad scripts configuration
+        const adScripts = [
+          {
+            src: '//pl27451996.profitableratecpm.com/04/9b/58/049b58bb8f039a484550d1e4845528c8.js',
+            id: 'ad-script-1'
+          },
+          {
+            src: '//pl27453451.profitableratecpm.com/f0/3a/a0/f03aa033bc9cb942a5fb91344c04656b.js',
+            id: 'ad-script-2'
+          },
+          {
+            src: '//pl27453437.profitableratecpm.com/461148cde71dd8c3586e2a95af4919d5/invoke.js',
+            id: 'ad-script-3',
+            attributes: {
+              'async': 'true',
+              'data-cfasync': 'false'
+            }
+          }
+        ];
 
-      // Ad 3 (Third Ad - with container)
-      const script3 = document.createElement('script');
-      script3.src = '//pl27453437.profitableratecpm.com/461148cde71dd8c3586e2a95af4919d5/invoke.js';
-      script3.async = true;
-      script3.dataset.cfasync = "false"; // Required for this ad
+        // Load all scripts with error handling
+        adScripts.forEach(({ src, id, attributes }) => {
+          if (document.getElementById(id)) return; // Skip if already loaded
 
-      // Append all scripts
-      document.body.appendChild(script1);
-      document.body.appendChild(script2);
-      document.body.appendChild(script3);
+          const script = document.createElement('script');
+          script.src = src;
+          script.id = id;
+          script.async = true;
 
-      // Create container for Ad 3
-      const adContainer = document.createElement('div');
-      adContainer.id = 'container-461148cde71dd8c3586e2a95af4919d5';
-      document.body.appendChild(adContainer);
+          // Add custom attributes if any
+          if (attributes) {
+            Object.entries(attributes).forEach(([key, value]) => {
+              script.setAttribute(key, value);
+            });
+          }
+
+          script.onerror = () => console.error(`Failed to load ad script: ${src}`);
+          document.body.appendChild(script);
+        });
+
+      } catch (error) {
+        console.error('Ad loading error:', error);
+      }
     };
 
-    loadAdScripts();
+    // Delay slightly to ensure DOM is ready
+    const timer = setTimeout(loadAdScripts, 300);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <Router>
-      <div>
-        {/* Navbar */}
+      <div className="app-container">
         <Navbar />
-
-        {/* Routes */}
+        
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/fun" element={<FunDashboard />} />
