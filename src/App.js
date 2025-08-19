@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./component//Navbar";
+import Navbar from "./component/Navbar";
 import Homepage from "./pages/Homepage";
 import FunDashboard from "./pages/FunDashboard";
 import ImageConverter from './pages/ImageConverter';
@@ -13,48 +13,16 @@ import AutoReply from './pages/AutoReply';
 import BlogPage from './pages/BlogPage';
 
 function App() {
-  // Function to load a script dynamically
-  const loadScript = (src) => {
-    return new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = src;
-      script.async = true;
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
-      document.body.appendChild(script);
-    });
-  };
-
-  // Load the ad scripts when the component mounts
   useEffect(() => {
-    const loadAds = async () => {
-      try {
-        await loadScript("//pl25785179.profitablecpmrate.com/38/f3/fd/38f3fd3af54ae11bf25edc4ed6b815d4.js");
-        await loadScript("//pl25812099.effectiveratecpm.com/53/4a/e4/534ae4b2b85725a6a295ee6f0edf9027.js");
-        await loadScript("//pl25785213.effectiveratecpm.com/e28dc6067e4236563bbed735b8ab040c/invoke.js");
-
-        // Set up the ad options
-        const adOptionsScript = document.createElement("script");
-        adOptionsScript.type = "text/javascript";
-        adOptionsScript.innerHTML = `
-          atOptions = {
-            'key' : 'e42d2be4c4faa9a29246561df49c6bc3',
-            'format' : 'iframe',
-            'height' : 60,
-            'width' : 468,
-            'params' : {}
-          };
-        `;
-        document.body.appendChild(adOptionsScript);
-
-        // Load the ad options invoke script
-        await loadScript("//www.highperformanceformat.com/e42d2be4c4faa9a29246561df49c6bc3/invoke.js");
-      } catch (error) {
-        console.error(error);
-      }
+    const loadAdScript = () => {
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = '//pl27451996.profitableratecpm.com/04/9b/58/049b58bb8f039a484550d1e4845528c8.js';
+      script.async = true;
+      document.body.appendChild(script);
     };
 
-    loadAds();
+    loadAdScript();
   }, []);
 
   return (
@@ -76,10 +44,6 @@ function App() {
           <Route path="/auto-reply" element={<AutoReply />} />
           <Route path="/blog" element={<BlogPage />} />
         </Routes>
-
-        {/* Ad Scripts */}
-        <script async="async" data-cfasync="false" src="//pl25785213.effectiveratecpm.com/e28dc6067e4236563bbed735b8ab040c/invoke.js"></script>
-        <div id="container-e28dc6067e4236563bbed735b8ab040c"></div>
       </div>
     </Router>
   );

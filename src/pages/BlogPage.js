@@ -123,6 +123,12 @@ const BlogDetailDialog = ({ blog, open, onClose }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // Reset currentIndex when blog changes
+  useEffect(() => {
+    setCurrentIndex(0);
+    setPlayingVideo(false);
+  }, [blog]);
+
   const handleNext = () => {
     setPlayingVideo(false);
     setCurrentIndex(prev => 
@@ -139,6 +145,16 @@ const BlogDetailDialog = ({ blog, open, onClose }) => {
 
   const handlePlayVideo = () => {
     setPlayingVideo(true);
+  };
+
+  const getDirectImageUrl = (url) => {
+    if (url.includes('drive.google.com')) {
+      const fileId = url.match(/\/file\/d\/([^\/]+)/)?.[1] || 
+                    url.match(/id=([^&]+)/)?.[1] || 
+                    url.split('/').slice(-1)[0];
+      return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    }
+    return url;
   };
 
   const getVideoUrl = (url) => {
@@ -223,7 +239,7 @@ const BlogDetailDialog = ({ blog, open, onClose }) => {
               ) : (
                 <>
                   <StyledImage
-                    src={blog.images[currentIndex]}
+                    src={getDirectImageUrl(blog.images[currentIndex])}
                     alt={`${blog.title || 'Blog'} image ${currentIndex + 1}`}
                     onError={(e) => {
                       e.target.onerror = null; 
@@ -255,7 +271,11 @@ const BlogDetailDialog = ({ blog, open, onClose }) => {
           </MediaContainer>
         )}
         
-        <Typography variant="body1" paragraph>
+        <Typography 
+          variant="body1" 
+          paragraph
+          sx={{ whiteSpace: 'pre-line' }} // This preserves line breaks and spaces
+        >
           {blog.content || 'No content available'}
         </Typography>
       </DialogContent>
@@ -304,7 +324,8 @@ const BlogPage = () => {
                 const cleanValue = row.c[index].v.toString().replace(/[()"]/g, '');
                 obj[key] = cleanValue.split(',').map(url => url.trim()).filter(url => url);
               } else {
-                obj[key] = row.c[index]?.v || '';
+                // Preserve newlines in content
+                obj[key] = row.c[index]?.v ? row.c[index].v.toString() : '';
               }
             }
           });
@@ -328,6 +349,31 @@ const BlogPage = () => {
     const uniqueCategories = [...new Set(blogData.map(blog => blog.category))];
     return ['All', ...uniqueCategories.filter(Boolean)];
   }, [blogData]);
+
+  const getDirectImageUrl = (url) => {
+    if (url.includes('drive.google.com')) {
+      const fileId = url.match(/\/file\/d\/([^\/]+)/)?.[1] || 
+                    url.match(/id=([^&]+)/)?.[1] || 
+                    url.split('/').slice(-1)[0];
+      return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    }
+    return url;
+  };
+
+  const isVideo = (url) => {
+    if (!url) return false;
+    return url.includes('drive.google.com');
+  };
+
+  const getThumbnailForVideo = (url) => {
+    if (url.includes('drive.google.com')) {
+      const fileId = url.match(/\/file\/d\/([^\/]+)/)?.[1] || 
+                    url.match(/id=([^&]+)/)?.[1] || 
+                    url.split('/').slice(-1)[0];
+      return `https://img.youtube.com/vi/${fileId}/hqdefault.jpg`;
+    }
+    return 'https://i.imgur.com/zvWTUVu.jpg';
+  };
 
   // Combined filter function
   const filteredBlogs = useMemo(() => {
@@ -365,21 +411,6 @@ const BlogPage = () => {
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
-  };
-
-  const isVideo = (url) => {
-    if (!url) return false;
-    return url.includes('drive.google.com');
-  };
-
-  const getThumbnailForVideo = (url) => {
-    if (url.includes('drive.google.com')) {
-      const fileId = url.match(/\/file\/d\/([^\/]+)/)?.[1] || 
-                    url.match(/id=([^&]+)/)?.[1] || 
-                    url.split('/').slice(-1)[0];
-      return `https://img.youtube.com/vi/${fileId}/hqdefault.jpg`;
-    }
-    return 'https://i.imgur.com/zvWTUVu.jpg';
   };
 
   if (loading) {
@@ -465,7 +496,7 @@ const BlogPage = () => {
                       (blog.images && blog.images.length > 0) 
                         ? isVideo(blog.images[0])
                           ? getThumbnailForVideo(blog.images[0])
-                          : blog.images[0]
+                          : getDirectImageUrl(blog.images[0])
                         : 'https://source.unsplash.com/random/300x200/?blog'
                     }
                     alt={blog.title || 'Blog image'}
