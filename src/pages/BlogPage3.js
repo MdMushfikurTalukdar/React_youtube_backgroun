@@ -151,38 +151,16 @@ const WriterInfo = styled(Box)({
   padding: '8px 0',
 });
 
-const ContentNavigation = styled(Box)({
-  display: 'flex',
-  justifyContent: 'center',
-  marginTop: '16px',
-  marginBottom: '8px',
-});
-
-const ContentNavButton = styled(Button)(({ theme, active }) => ({
-  minWidth: '40px',
-  margin: '0 4px',
-  color: active ? theme.palette.primary.main : theme.palette.text.secondary,
-  border: active ? `1px solid ${theme.palette.primary.main}` : '1px solid #e0e0e0',
-}));
-
 const BlogDetailDialog = ({ blog, open, onClose, onLike, onDislike, userReactions }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [playingVideo, setPlayingVideo] = useState(false);
-  const [currentContentPart, setCurrentContentPart] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Reset states when blog changes
+  // Reset currentIndex when blog changes
   useEffect(() => {
     setCurrentIndex(0);
     setPlayingVideo(false);
-    setCurrentContentPart(0);
-  }, [blog]);
-
-  // Split content into parts if %% is present
-  const contentParts = useMemo(() => {
-    if (!blog?.content) return [''];
-    return blog.content.split('%%').map(part => part.trim());
   }, [blog]);
 
   const handleNext = () => {
@@ -201,18 +179,6 @@ const BlogDetailDialog = ({ blog, open, onClose, onLike, onDislike, userReaction
 
   const handlePlayVideo = () => {
     setPlayingVideo(true);
-  };
-
-  const handleNextContentPart = () => {
-    setCurrentContentPart(prev => 
-      prev === contentParts.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  const handlePrevContentPart = () => {
-    setCurrentContentPart(prev => 
-      prev === 0 ? contentParts.length - 1 : prev - 1
-    );
   };
 
   const getDirectImageUrl = (url) => {
@@ -351,34 +317,12 @@ const BlogDetailDialog = ({ blog, open, onClose, onLike, onDislike, userReaction
           </WriterInfo>
         )}
         
-        {/* Content Navigation */}
-        {contentParts.length > 1 && (
-          <ContentNavigation>
-            <IconButton onClick={handlePrevContentPart} size="small">
-              <ChevronLeft />
-            </IconButton>
-            {contentParts.map((_, index) => (
-              <ContentNavButton 
-                key={index}
-                active={currentContentPart === index}
-                onClick={() => setCurrentContentPart(index)}
-                size="small"
-              >
-                {index + 1}
-              </ContentNavButton>
-            ))}
-            <IconButton onClick={handleNextContentPart} size="small">
-              <ChevronRight />
-            </IconButton>
-          </ContentNavigation>
-        )}
-        
         <Typography 
           variant="body1" 
           paragraph
           sx={{ whiteSpace: 'pre-line', mt: 2 }}
         >
-          {contentParts[currentContentPart] || 'No content available'}
+          {blog.content || 'No content available'}
         </Typography>
       </DialogContent>
       
