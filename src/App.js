@@ -11,6 +11,8 @@ import DownloadVideo from './pages/DownloadVideo';
 import InstagramDownloader from './pages/InstagramDownloader';
 import AutoReply from './pages/AutoReply';
 import BlogPage from './pages/BlogPage';
+import Login from './pages/Login';
+import Registration from './pages/Registration';
 
 function App() {
   useEffect(() => {
@@ -23,10 +25,11 @@ function App() {
 
         // Ad scripts configuration
         const adScripts = [
-          {
-            src: '//pl27451996.profitableratecpm.com/04/9b/58/049b58bb8f039a484550d1e4845528c8.js',
-            id: 'ad-script-1'
-          },
+          //popunder ads
+          // {
+          //   src: '//pl27451996.profitableratecpm.com/04/9b/58/049b58bb8f039a484550d1e4845528c8.js',
+          //   id: 'ad-script-1'
+          // },
           {
             src: '//pl27453451.profitableratecpm.com/f0/3a/a0/f03aa033bc9cb942a5fb91344c04656b.js',
             id: 'ad-script-2'
@@ -87,6 +90,8 @@ function App() {
           <Route path="/instagram-downloader" element={<InstagramDownloader />} />
           <Route path="/auto-reply" element={<AutoReply />} />
           <Route path="/blog" element={<BlogPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Registration />} />
         </Routes>
       </div>
     </Router>
