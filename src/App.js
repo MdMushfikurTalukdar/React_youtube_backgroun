@@ -15,6 +15,8 @@ import Login from './pages/Login';
 import Registration from './pages/Registration';
 import FootballCareer from './pages/FootballCareer'; // <- 1. IMPORT THE NEW PAGE
 import { GameProvider } from './context/GameContext'; // <- 2. IMPORT THE PROVIDER
+import ChatInterface from './pages/ChatInterface'; // Import the new ChatInterface
+import { AuthProvider } from './context/AuthContext'; // Import AuthProvider
 
 function App() {
   useEffect(() => {
@@ -80,28 +82,31 @@ function App() {
     // 3. WRAP EVERYTHING IN GameProvider
     <GameProvider>
       {/* 4. ONLY ONE Router AT THE TOP LEVEL */}
-      <Router>
-        <div className="app-container">
-          <Navbar />
-          <Routes>
-            {/* 5. ALL ROUTES GO HERE, INSIDE THE SINGLE Router */}
-            <Route path="/" element={<Homepage />} />
-            <Route path="/fun" element={<FunDashboard />} />
-            <Route path="/image-converter" element={<ImageConverter />} />
-            <Route path="/video-converter" element={<VideoConverter />} />
-            <Route path="/music-maker" element={<MusicMaker />} />
-            <Route path="/text-to-speech" element={<TextToSpeech />} />
-            <Route path="/download-video" element={<DownloadVideo />} />
-            <Route path="/instagram-downloader" element={<InstagramDownloader />} />
-            <Route path="/auto-reply" element={<AutoReply />} />
-            <Route path="/blog" element={<BlogPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Registration />} />
-            {/* 6. ADD THE NEW ROUTE FOR THE GAME */}
-            <Route path="/football-career" element={<FootballCareer />} />
-          </Routes>
-        </div>
-      </Router>
+      <AuthProvider> {/* Wrap with AuthProvider */}
+        <Router>
+            <div className="app-container">
+            <Navbar />
+            <Routes>
+                {/* 5. ALL ROUTES GO HERE, INSIDE THE SINGLE Router */}
+                <Route path="/" element={<Homepage />} />
+                <Route path="/fun" element={<FunDashboard />} />
+                <Route path="/image-converter" element={<ImageConverter />} />
+                <Route path="/video-converter" element={<VideoConverter />} />
+                <Route path="/music-maker" element={<MusicMaker />} />
+                <Route path="/text-to-speech" element={<TextToSpeech />} />
+                <Route path="/download-video" element={<DownloadVideo />} />
+                <Route path="/instagram-downloader" element={<InstagramDownloader />} />
+                <Route path="/auto-reply" element={<AutoReply />} />
+                <Route path="/blog" element={<BlogPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Registration />} />
+                {/* 6. ADD THE NEW ROUTE FOR THE GAME */}
+                <Route path="/football-career" element={<FootballCareer />} />
+                <Route path="/chat" element={<ChatInterface />} /> {/* Add chat route */}
+            </Routes>
+            </div>
+        </Router>
+      </AuthProvider>
     </GameProvider>
   );
 }

@@ -13,22 +13,20 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState({ open: false, message: '', severity: 'error' });
+  const [alert, setAlert] = useState({ open: false, severity: 'error', message: '' });
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    // Clear error when user types
     if (errors[name]) {
       setErrors({ ...errors, [name]: '' });
     }
@@ -42,6 +40,7 @@ const Login = () => {
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email is invalid';
     }
+    
     if (!formData.password) {
       newErrors.password = 'Password is required';
     }
@@ -53,72 +52,70 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      return;
+    }
     
     setLoading(true);
-    setAlert({ open: false, message: '', severity: 'error' });
     
     try {
-      // Your Google Apps Script deployment URL
-      const scriptURL = 'https://script.google.com/macros/s/AKfycbxiZL5Gzfvbcnp1tUpIklLh2e94N5JJ9IafGsPCqEwevo15PGWnyILPTPTN-Mo6ovRm/exec';
+      // Convert Google Sheets URL to JSON endpoint
+      const sheetId = '1B4d7a3-fZZuiiET-WBvdqBbee-VoSQpTE_a_602Bd18';
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
       
-      // Create URL encoded form data
-      const formDataToSubmit = new URLSearchParams();
-      formDataToSubmit.append('action', 'login');
-      formDataToSubmit.append('email', formData.email);
-      formDataToSubmit.append('password', formData.password);
+      const response = await fetch(url);
+      const text = await response.text();
       
-      // Use a proxy to bypass CORS issues in development
-      const useCorsProxy = process.env.NODE_ENV === 'development';
-      const url = useCorsProxy 
-        ? `https://cors-anywhere.herokuapp.com/${scriptURL}`
-        : scriptURL;
+      // Extract JSON from the response
+      const jsonText = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+      const data = JSON.parse(jsonText);
       
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formDataToSubmit.toString()
+      // Process the rows from the sheet
+      const rows = data.table.rows;
+      const users = rows.slice(1).map(row => {
+        const cells = row.c;
+        return {
+          email: cells[0]?.v || '',
+          name: cells[1]?.v || '',
+          age: cells[2]?.v || '',
+          gender: cells[3]?.v || '',
+          password: cells[4]?.v || '',
+          registrationDate: cells[5]?.v || ''
+        };
       });
       
-      // Parse the response
-      const responseText = await response.text();
-      let result;
+      // Check if credentials match
+      const user = users.find(user => 
+        user.email === formData.email && user.password === formData.password
+      );
       
-      try {
-        result = JSON.parse(responseText);
-      } catch (e) {
-        console.error('JSON parse error:', e);
-        throw new Error('Invalid response format from server');
-      }
-      
-      if (result.success) {
-        // Store user data in localStorage
-        localStorage.setItem('user', JSON.stringify(result.user));
+      if (user) {
         setAlert({
           open: true,
-          message: 'Login successful! Redirecting...',
-          severity: 'success'
+          severity: 'success',
+          message: `Login successful! Welcome back, ${user.name}!`
         });
         
-        // Redirect to homepage after 1 second
+        // Use the auth context to log in
+        login(user);
+        
+        // Redirect to chat page after a short delay
         setTimeout(() => {
-          navigate('/');
-        }, 1000);
+          navigate('/chat');
+        }, 1500);
       } else {
         setAlert({
           open: true,
-          message: result.message || 'Invalid email or password',
-          severity: 'error'
+          severity: 'error',
+          message: 'Invalid email or password. Please try again.'
         });
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Error fetching data from Google Sheets:', error);
       setAlert({
         open: true,
-        message: 'Login service is temporarily unavailable. Please try again later.',
-        severity: 'error'
+        severity: 'error',
+        message: 'An error occurred during authentication. Please try again later.'
       });
     } finally {
       setLoading(false);
@@ -196,6 +193,12 @@ const Login = () => {
           <Box sx={{ textAlign: 'center', mt: 3 }}>
             <Typography variant="body2">
               Don't have an account? <Link to="/register" style={{ textDecoration: 'none', fontWeight: 'bold' }}>Sign Up</Link>
+            </Typography>
+          </Box>
+          
+          <Box sx={{ mt: 2, p: 1, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+            <Typography variant="caption" color="textSecondary">
+              For testing: try email: akkas@gmail.com, password: aaaaaa
             </Typography>
           </Box>
         </Box>

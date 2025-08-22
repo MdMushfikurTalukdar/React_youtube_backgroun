@@ -1,1 +1,3 @@
-https://script.google.com/macros/s/AKfycbxiZL5Gzfvbcnp1tUpIklLh2e94N5JJ9IafGsPCqEwevo15PGWnyILPTPTN-Mo6ovRm/exec
+login/register : https://script.google.com/macros/s/AKfycbxiZL5Gzfvbcnp1tUpIklLh2e94N5JJ9IafGsPCqEwevo15PGWnyILPTPTN-Mo6ovRm/exec
+
+chat bot : https://script.google.com/macros/s/AKfycbzR8qkETVfN3ZpNCGRVIHhNePfsJxocgg-5A3OUxv76qjGG7h6USFFXs5-qIUdaghjR/exec
