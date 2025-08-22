@@ -13,8 +13,6 @@ import AutoReply from './pages/AutoReply';
 import BlogPage from './pages/BlogPage';
 import Login from './pages/Login';
 import Registration from './pages/Registration';
-import FootballCareer from './pages/FootballCareer'; // <- 1. IMPORT THE NEW PAGE
-import { GameProvider } from './context/GameContext'; // <- 2. IMPORT THE PROVIDER
 
 function App() {
   useEffect(() => {
@@ -77,32 +75,26 @@ function App() {
   }, []);
 
   return (
-    // 3. WRAP EVERYTHING IN GameProvider
-    <GameProvider>
-      {/* 4. ONLY ONE Router AT THE TOP LEVEL */}
-      <Router>
-        <div className="app-container">
-          <Navbar />
-          <Routes>
-            {/* 5. ALL ROUTES GO HERE, INSIDE THE SINGLE Router */}
-            <Route path="/" element={<Homepage />} />
-            <Route path="/fun" element={<FunDashboard />} />
-            <Route path="/image-converter" element={<ImageConverter />} />
-            <Route path="/video-converter" element={<VideoConverter />} />
-            <Route path="/music-maker" element={<MusicMaker />} />
-            <Route path="/text-to-speech" element={<TextToSpeech />} />
-            <Route path="/download-video" element={<DownloadVideo />} />
-            <Route path="/instagram-downloader" element={<InstagramDownloader />} />
-            <Route path="/auto-reply" element={<AutoReply />} />
-            <Route path="/blog" element={<BlogPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Registration />} />
-            {/* 6. ADD THE NEW ROUTE FOR THE GAME */}
-            <Route path="/football-career" element={<FootballCareer />} />
-          </Routes>
-        </div>
-      </Router>
-    </GameProvider>
+    <Router>
+      <div className="app-container">
+        <Navbar />
+        
+        <Routes>
+          <Route path="/" element={<Homepage />} />
+          <Route path="/fun" element={<FunDashboard />} />
+          <Route path="/image-converter" element={<ImageConverter />} />
+          <Route path="/video-converter" element={<VideoConverter />} />
+          <Route path="/music-maker" element={<MusicMaker />} />
+          <Route path="/text-to-speech" element={<TextToSpeech />} />
+          <Route path="/download-video" element={<DownloadVideo />} />
+          <Route path="/instagram-downloader" element={<InstagramDownloader />} />
+          <Route path="/auto-reply" element={<AutoReply />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Registration />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
