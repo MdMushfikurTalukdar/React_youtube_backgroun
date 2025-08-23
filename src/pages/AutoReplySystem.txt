@@ -1,0 +1,1004 @@
+import React, { useState, useRef} from 'react';
+import {
+  Container,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  Chip,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Alert,
+  Card,
+  CardContent,
+  IconButton,
+  AppBar,
+  Toolbar,
+  Switch,
+  FormControlLabel,
+  Tabs,
+  Tab,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Slider
+} from '@mui/material';
+import {
+  Upload,
+  Send,
+  Delete,
+  LightMode,
+  DarkMode,
+  ExpandMore,
+  Link,
+  Article,
+  SmartToy
+} from '@mui/icons-material';
+
+const AutoReplySystem = () => {
+  const [documents, setDocuments] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
+  const [responseStyle, setResponseStyle] = useState('friendly');
+  const [responseLength, setResponseLength] = useState(3);
+  const fileInputRef = useRef(null);
+
+  // Sample knowledge base for demonstration
+  const [knowledgeBase, setKnowledgeBase] = useState([
+    "Our company was founded in 2010 with a mission to provide excellent customer service.",
+    "We offer a 30-day money-back guarantee on all products.",
+    "Our customer support team is available 24/7 to assist you.",
+    "Shipping typically takes 3-5 business days for domestic orders.",
+    "International orders may take 7-14 business days to arrive.",
+  ]);
+
+  // Predefined responses for common questions
+  const predefinedResponses = {
+    greeting: ["Hello! How can I help you today?", "Hi there! What can I assist you with?", "Greetings! How may I be of service?"],
+    thanks: ["You're welcome!", "Happy to help!", "My pleasure!"],
+    goodbye: ["Goodbye! Have a great day!", "Farewell! Come back anytime!", "See you later!"],
+    unknown: ["I'm not sure how to respond to that. Can you provide more details?", "That's an interesting point. Could you elaborate?", "I need more context to respond accurately."]
+  };
+
+  // Handle document upload
+  const handleFileUpload = (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    const newDocuments = files.map(file => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      type: file.type,
+      content: null,
+      uploadedAt: new Date()
+    }));
+
+    setDocuments(prev => [...prev, ...newDocuments]);
+    setError('');
+
+    // Read file contents
+    files.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target.result;
+        setDocuments(prev => prev.map(doc => 
+          doc.id === newDocuments[index].id ? {...doc, content} : doc
+        ));
+        
+        // Add content to knowledge base
+        const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
+        setKnowledgeBase(prev => [...prev, ...sentences]);
+      };
+      reader.onerror = () => {
+        setError(`Failed to read file: ${file.name}`);
+      };
+      reader.readAsText(file);
+    });
+  };
+
+  // Add website content
+  const handleAddWebsite = () => {
+    const url = prompt("Enter website URL to add to knowledge base:");
+    if (!url) return;
+    
+    // In a real implementation, you would use CORS-friendly approaches
+    // For demo purposes, we'll simulate adding website content
+    setIsProcessing(true);
+    
+    setTimeout(() => {
+      const simulatedContent = `Content from ${url} would be fetched here. In a real implementation, you might use a CORS proxy or a browser extension to access website content.`;
+      
+      setKnowledgeBase(prev => [...prev, simulatedContent]);
+      setIsProcessing(false);
+      
+      setMessages(prev => [{
+        type: 'system',
+        text: `Added website content from ${url} to knowledge base`,
+        timestamp: new Date()
+      }, ...prev]);
+    }, 1500);
+  };
+
+  // Remove a document
+  const removeDocument = (id) => {
+    setDocuments(prev => prev.filter(doc => doc.id !== id));
+  };
+
+  // Add custom knowledge
+  const addCustomKnowledge = () => {
+    const knowledge = prompt("Enter information to add to the knowledge base:");
+    if (knowledge && knowledge.trim()) {
+      setKnowledgeBase(prev => [...prev, knowledge.trim()]);
+      setMessages(prev => [{
+        type: 'system',
+        text: `Added custom knowledge to database`,
+        timestamp: new Date()
+      }, ...prev]);
+    }
+  };
+
+  // Analyze message and generate response
+  const generateResponse = (message) => {
+    const lowerMessage = message.toLowerCase();
+    
+    // Check for greetings
+    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+      return predefinedResponses.greeting[Math.floor(Math.random() * predefinedResponses.greeting.length)];
+    }
+    
+    // Check for thanks
+    if (lowerMessage.includes('thank') || lowerMessage.includes('thanks')) {
+      return predefinedResponses.thanks[Math.floor(Math.random() * predefinedResponses.thanks.length)];
+    }
+    
+    // Check for goodbye
+    if (lowerMessage.includes('bye') || lowerMessage.includes('goodbye') || lowerMessage.includes('see you')) {
+      return predefinedResponses.goodbye[Math.floor(Math.random() * predefinedResponses.goodbye.length)];
+    }
+    
+    // Search knowledge base for relevant information
+    const relevantKnowledge = knowledgeBase.filter(info => {
+      const lowerInfo = info.toLowerCase();
+      const words = lowerMessage.split(/\s+/).filter(word => word.length > 3);
+      return words.some(word => lowerInfo.includes(word));
+    });
+    
+    if (relevantKnowledge.length > 0) {
+      // Select a random piece of relevant knowledge
+      const selectedKnowledge = relevantKnowledge[Math.floor(Math.random() * relevantKnowledge.length)];
+      
+      // Style the response based on settings
+      let response = selectedKnowledge;
+      
+      if (responseStyle === 'friendly') {
+        response = `Based on our information: ${selectedKnowledge}`;
+      } else if (responseStyle === 'professional') {
+        response = `Our records indicate: ${selectedKnowledge}`;
+      } else if (responseStyle === 'concise') {
+        // Try to shorten the response
+        const sentences = selectedKnowledge.split(/[.!?]+/);
+        response = sentences[0] + (sentences.length > 1 ? '...' : '');
+      }
+      
+      return response;
+    }
+    
+    // Fallback to unknown response
+    return predefinedResponses.unknown[Math.floor(Math.random() * predefinedResponses.unknown.length)];
+  };
+
+  // Send a message
+  const sendMessage = async () => {
+    if (!currentMessage.trim()) return;
+
+    // Add user message
+    const userMessage = {
+      type: 'user',
+      text: currentMessage,
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [userMessage, ...prev]);
+    setCurrentMessage('');
+    setIsProcessing(true);
+    
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Generate response
+    const responseText = generateResponse(currentMessage);
+    
+    // Add AI response
+    const aiMessage = {
+      type: 'ai',
+      text: responseText,
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [aiMessage, ...prev]);
+    setIsProcessing(false);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  const clearAll = () => {
+    setDocuments([]);
+    setMessages([]);
+    setCurrentMessage('');
+    setError('');
+  };
+
+  // Sample conversations for demonstration
+  const sampleConversations = [
+    { input: "Hello", output: "Hi there! How can I assist you today?" },
+    { input: "What's your return policy?", output: "We offer a 30-day money-back guarantee on all products." },
+    { input: "How long does shipping take?", output: "Shipping typically takes 3-5 business days for domestic orders." },
+    { input: "When was your company founded?", output: "Our company was founded in 2010 with a mission to provide excellent customer service." }
+  ];
+
+  return (
+    <Box sx={{ 
+      bgcolor: darkMode ? '#121212' : 'background.default', 
+      minHeight: '100vh',
+      color: darkMode ? '#fff' : 'text.primary',
+      transition: 'all 0.3s ease',
+      pb: 4
+    }}>
+      <AppBar position="static" color={darkMode ? "default" : "primary"}>
+        <Toolbar>
+          <SmartToy sx={{ mr: 2 }} />
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Frontend Auto-Reply System
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={darkMode}
+                onChange={() => setDarkMode(!darkMode)}
+                icon={<LightMode />}
+                checkedIcon={<DarkMode />}
+              />
+            }
+            label={darkMode ? "Dark Mode" : "Light Mode"}
+          />
+        </Toolbar>
+      </AppBar>
+
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography variant="h3" component="h1" gutterBottom align="center" color="primary">
+          Auto-Reply AI System
+        </Typography>
+        
+        <Typography variant="body1" gutterBottom align="center" sx={{ mb: 4 }}>
+          Process documents and generate automatic responses - 100% in your browser
+        </Typography>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+            {error}
+          </Alert>
+        )}
+
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)}>
+            <Tab label="Chat" />
+            <Tab label="Knowledge Base" />
+            <Tab label="Settings" />
+            <Tab label="Examples" />
+          </Tabs>
+        </Box>
+
+        {tabValue === 0 && (
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
+            {/* Left side - Knowledge management */}
+            <Box sx={{ flex: 1 }}>
+              <Card variant="outlined" sx={{ bgcolor: darkMode ? '#1e1e1e' : '', mb: 2 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Knowledge Sources
+                  </Typography>
+                  
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<Upload />}
+                      onClick={() => fileInputRef.current.click()}
+                      size="small"
+                    >
+                      Upload Text Files
+                    </Button>
+                    <input
+                      type="file"
+                      multiple
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                      style={{ display: 'none' }}
+                      accept=".txt,.text,text/plain"
+                    />
+                    
+                    <Button
+                      variant="outlined"
+                      startIcon={<Link />}
+                      onClick={handleAddWebsite}
+                      size="small"
+                    >
+                      Add Website Content
+                    </Button>
+                    
+                    <Button
+                      variant="outlined"
+                      startIcon={<Article />}
+                      onClick={addCustomKnowledge}
+                      size="small"
+                    >
+                      Add Custom Knowledge
+                    </Button>
+                  </Box>
+                  
+                  {documents.length > 0 && (
+                    <>
+                      <Typography variant="body2" gutterBottom>
+                        Uploaded Documents:
+                      </Typography>
+                      <List dense>
+                        {documents.map((doc) => (
+                          <ListItem
+                            key={doc.id}
+                            secondaryAction={
+                              <IconButton edge="end" onClick={() => removeDocument(doc.id)} size="small">
+                                <Delete />
+                              </IconButton>
+                            }
+                          >
+                            <ListItemText
+                              primary={doc.name}
+                              secondary={doc.content ? 
+                                `${doc.content.length} characters` : 
+                                'Processing...'}
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+              
+              <Card variant="outlined" sx={{ bgcolor: darkMode ? '#1e1e1e' : '' }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Response Settings
+                  </Typography>
+                  
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" gutterBottom>
+                      Response Style: {responseStyle}
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                      {['friendly', 'professional', 'concise'].map(style => (
+                        <Chip
+                          key={style}
+                          label={style}
+                          onClick={() => setResponseStyle(style)}
+                          color={responseStyle === style ? 'primary' : 'default'}
+                          size="small"
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                  
+                  <Box>
+                    <Typography variant="body2" gutterBottom>
+                      Response Length
+                    </Typography>
+                    <Slider
+                      value={responseLength}
+                      onChange={(e, newValue) => setResponseLength(newValue)}
+                      min={1}
+                      max={5}
+                      marks
+                      valueLabelDisplay="auto"
+                      valueLabelFormat={(value) => {
+                        const labels = ['Very Short', 'Short', 'Medium', 'Long', 'Very Long'];
+                        return labels[value - 1];
+                      }}
+                    />
+                  </Box>
+                </CardContent>
+              </Card>
+            </Box>
+            
+            {/* Right side - Chat interface */}
+            <Box sx={{ flex: 2 }}>
+              <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: darkMode ? '#1e1e1e' : '' }}>
+                <Typography variant="h6" gutterBottom>
+                  Auto-Reply Chat
+                </Typography>
+                
+                <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    placeholder="Type your message here..."
+                    value={currentMessage}
+                    onChange={(e) => setCurrentMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    disabled={isProcessing}
+                    multiline
+                    maxRows={3}
+                    sx={{ 
+                      bgcolor: darkMode ? '#2d2d2d' : '',
+                      '& .MuiInputBase-input': { color: darkMode ? '#fff' : '' }
+                    }}
+                  />
+                  <Button
+                    variant="contained"
+                    endIcon={<Send />}
+                    onClick={sendMessage}
+                    disabled={isProcessing || !currentMessage.trim()}
+                    sx={{ height: 'fit-content' }}
+                  >
+                    Send
+                  </Button>
+                </Box>
+                
+                <Button size="small" onClick={clearAll} sx={{ mr: 1 }}>
+                  Clear Chat
+                </Button>
+              </Paper>
+              
+              {messages.length > 0 ? (
+                <Paper variant="outlined" sx={{ p: 2, bgcolor: darkMode ? '#1e1e1e' : '', maxHeight: '500px', overflow: 'auto' }}>
+                  <List>
+                    {messages.map((message, index) => (
+                      <Box key={index}>
+                        <ListItem alignItems="flex-start">
+                          <Box sx={{ 
+                            display: 'flex', 
+                            flexDirection: 'column',
+                            width: '100%',
+                            p: 1,
+                            bgcolor: message.type === 'user' ? 
+                              (darkMode ? 'primary.dark' : 'primary.light') : 
+                              (darkMode ? 'grey.800' : 'grey.100'),
+                            borderRadius: 1
+                          }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                              <Typography variant="caption" fontWeight="bold">
+                                {message.type === 'user' ? 'You' : 'Auto-Reply'}
+                              </Typography>
+                              <Typography variant="caption">
+                                {message.timestamp.toLocaleTimeString()}
+                              </Typography>
+                            </Box>
+                            <Typography variant="body1">
+                              {message.text}
+                            </Typography>
+                          </Box>
+                        </ListItem>
+                        {index < messages.length - 1 && <Divider sx={{ my: 1 }} />}
+                      </Box>
+                    ))}
+                  </List>
+                </Paper>
+              ) : (
+                <Paper variant="outlined" sx={{ p: 3, textAlign: 'center', bgcolor: darkMode ? '#1e1e1e' : '' }}>
+                  <Typography variant="body1" color="textSecondary">
+                    No messages yet. Start a conversation or add knowledge sources to improve responses.
+                  </Typography>
+                </Paper>
+              )}
+            </Box>
+          </Box>
+        )}
+
+        {tabValue === 1 && (
+          <Card variant="outlined" sx={{ bgcolor: darkMode ? '#1e1e1e' : '', p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Knowledge Base
+            </Typography>
+            
+            {knowledgeBase.length > 0 ? (
+              <List>
+                {knowledgeBase.map((item, index) => (
+                  <ListItem key={index}>
+                    <ListItemText primary={item} />
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <Typography variant="body2" color="textSecondary" align="center" sx={{ py: 3 }}>
+                No knowledge added yet. Upload documents or add custom knowledge to build your knowledge base.
+              </Typography>
+            )}
+          </Card>
+        )}
+
+        {tabValue === 2 && (
+          <Card variant="outlined" sx={{ bgcolor: darkMode ? '#1e1e1e' : '', p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              System Settings
+            </Typography>
+            
+            <Accordion sx={{ bgcolor: darkMode ? '#2d2d2d' : '' }}>
+              <AccordionSummary expandIcon={<ExpandMore />}>
+                <Typography>Response Behavior</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="body2" paragraph>
+                  Adjust how the auto-reply system generates responses based on your knowledge base.
+                </Typography>
+                
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body2" gutterBottom>
+                    Response Style
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                    {['friendly', 'professional', 'concise'].map(style => (
+                      <Chip
+                        key={style}
+                        label={style}
+                        onClick={() => setResponseStyle(style)}
+                        color={responseStyle === style ? 'primary' : 'default'}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+                
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body2" gutterBottom>
+                    Response Length
+                  </Typography>
+                  <Slider
+                    value={responseLength}
+                    onChange={(e, newValue) => setResponseLength(newValue)}
+                    min={1}
+                    max={5}
+                    marks
+                    valueLabelDisplay="auto"
+                    valueLabelFormat={(value) => {
+                      const labels = ['Very Short', 'Short', 'Medium', 'Long', 'Very Long'];
+                      return labels[value - 1];
+                    }}
+                  />
+                </Box>
+              </AccordionDetails>
+            </Accordion>
+            
+            <Accordion sx={{ bgcolor: darkMode ? '#2d2d2d' : '' }}>
+              <AccordionSummary expandIcon={<ExpandMore />}>
+                <Typography>Knowledge Management</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="body2" paragraph>
+                  Manage how the system uses your uploaded documents and knowledge sources.
+                </Typography>
+                
+                <Button variant="outlined" onClick={clearAll} sx={{ mr: 2 }}>
+                  Clear All Data
+                </Button>
+              </AccordionDetails>
+            </Accordion>
+          </Card>
+        )}
+
+        {tabValue === 3 && (
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              Example Conversations
+            </Typography>
+            
+            <Typography variant="body2" paragraph>
+              Here are some examples of how the auto-reply system can respond based on knowledge sources:
+            </Typography>
+            
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {sampleConversations.map((conv, index) => (
+                <Card key={index} variant="outlined" sx={{ bgcolor: darkMode ? '#1e1e1e' : '' }}>
+                  <CardContent>
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      User:
+                    </Typography>
+                    <Typography variant="body1" paragraph>
+                      {conv.input}
+                    </Typography>
+                    
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      Auto-Reply:
+                    </Typography>
+                    <Typography variant="body1">
+                      {conv.output}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        <Box sx={{ mt: 4, p: 2, bgcolor: darkMode ? '#1e1e1e' : '#f5f5f5', borderRadius: 1 }}>
+          <Typography variant="h6" gutterBottom>
+            How This Auto-Reply System Works
+          </Typography>
+          <Typography variant="body2" paragraph>
+            This is a 100% frontend auto-reply system that works entirely in your browser. No data is sent to any server.
+          </Typography>
+          
+          <Typography variant="body2" paragraph>
+            <strong>How it works:</strong>
+          </Typography>
+          <ul>
+            <li><Typography variant="body2">Upload text files to add to the knowledge base</Typography></li>
+            <li><Typography variant="body2">The system processes these files directly in your browser</Typography></li>
+            <li><Typography variant="body2">When you type a message, it searches the knowledge base for relevant information</Typography></li>
+            <li><Typography variant="body2">It generates responses based on what it finds in your documents</Typography></li>
+          </ul>
+          
+          <Typography variant="body2">
+            <strong>Note:</strong> For security reasons, browsers can't directly access most external websites. The "Add Website Content" feature is simulated for demonstration.
+          </Typography>
+        </Box>
+      </Container>
+    </Box>
+  );
+};
+
+export default AutoReplySystem;
+
+
+sample 2:
+import React, { useState, useRef } from 'react';
+import {
+  Container,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  Box,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Alert,
+  Card,
+  CardContent,
+  IconButton,
+  AppBar,
+  Toolbar,
+  Switch
+} from '@mui/material';
+import {
+  Upload,
+  Send,
+  Delete,
+  LightMode,
+  DarkMode,
+  SmartToy
+} from '@mui/icons-material';
+
+const AutoReplySystem = () => {
+  const [documents, setDocuments] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
+  const fileInputRef = useRef(null);
+
+  // Simple knowledge base
+  const [knowledgeBase, setKnowledgeBase] = useState([
+    "We offer a 30-day money-back guarantee on all products.",
+    "Shipping takes 3-5 business days for domestic orders.",
+    "Our support team is available 24/7 to help you.",
+  ]);
+
+  // Handle document upload
+  const handleFileUpload = (event) => {
+    const files = Array.from(event.target.files);
+    if (files.length === 0) return;
+
+    const newDocuments = files.map(file => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      content: null,
+    }));
+
+    setDocuments(prev => [...prev, ...newDocuments]);
+    setError('');
+
+    // Read file contents
+    files.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target.result;
+        setDocuments(prev => prev.map(doc => 
+          doc.id === newDocuments[index].id ? {...doc, content} : doc
+        ));
+        
+        // Add content to knowledge base
+        const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
+        setKnowledgeBase(prev => [...prev, ...sentences]);
+      };
+      reader.onerror = () => {
+        setError(`Failed to read file: ${file.name}`);
+      };
+      reader.readAsText(file);
+    });
+  };
+
+  // Remove a document
+  const removeDocument = (id) => {
+    setDocuments(prev => prev.filter(doc => doc.id !== id));
+  };
+
+  // Generate response
+  const generateResponse = (message) => {
+    const lowerMessage = message.toLowerCase();
+    
+    // Check for simple greetings
+    if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
+      return "Hello! How can I help you today?";
+    }
+    
+    // Search knowledge base for relevant information
+    const relevantKnowledge = knowledgeBase.filter(info => {
+      const lowerInfo = info.toLowerCase();
+      const words = lowerMessage.split(/\s+/).filter(word => word.length > 3);
+      return words.some(word => lowerInfo.includes(word));
+    });
+    
+    if (relevantKnowledge.length > 0) {
+      return relevantKnowledge[0];
+    }
+    
+    return "I'm not sure how to respond to that. Can you provide more details?";
+  };
+
+  // Send a message
+  const sendMessage = async () => {
+    if (!currentMessage.trim()) return;
+
+    // Add user message
+    const userMessage = {
+      type: 'user',
+      text: currentMessage,
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [userMessage, ...prev]);
+    setCurrentMessage('');
+    setIsProcessing(true);
+    
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Generate response
+    const responseText = generateResponse(currentMessage);
+    
+    // Add AI response
+    const aiMessage = {
+      type: 'ai',
+      text: responseText,
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [aiMessage, ...prev]);
+    setIsProcessing(false);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  const clearAll = () => {
+    setDocuments([]);
+    setMessages([]);
+    setCurrentMessage('');
+    setError('');
+  };
+
+  return (
+    <Box sx={{ 
+      bgcolor: darkMode ? '#121212' : 'background.default', 
+      minHeight: '100vh',
+      color: darkMode ? '#fff' : 'text.primary',
+      pb: 4
+    }}>
+      <AppBar position="static" color={darkMode ? "default" : "primary"}>
+        <Toolbar>
+          <SmartToy sx={{ mr: 2 }} />
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Simple Auto-Reply System
+          </Typography>
+          <Switch
+            checked={darkMode}
+            onChange={() => setDarkMode(!darkMode)}
+            icon={<LightMode />}
+            checkedIcon={<DarkMode />}
+          />
+          <Typography variant="body2">
+            {darkMode ? "Dark" : "Light"}
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom align="center">
+          Auto-Reply Chat
+        </Typography>
+        
+        <Typography variant="body1" gutterBottom align="center" sx={{ mb: 4 }}>
+          Upload text files and chat with the AI
+        </Typography>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>
+            {error}
+          </Alert>
+        )}
+
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {/* File upload section */}
+          <Card variant="outlined">
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Add Knowledge
+              </Typography>
+              
+              <Button
+                variant="outlined"
+                startIcon={<Upload />}
+                onClick={() => fileInputRef.current.click()}
+                sx={{ mb: 2 }}
+              >
+                Upload Text Files
+              </Button>
+              <input
+                type="file"
+                multiple
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+                accept=".txt,.text,text/plain"
+              />
+              
+              {documents.length > 0 && (
+                <>
+                  <Typography variant="body2" gutterBottom sx={{ mt: 2 }}>
+                    Uploaded Files:
+                  </Typography>
+                  <List dense>
+                    {documents.map((doc) => (
+                      <ListItem
+                        key={doc.id}
+                        secondaryAction={
+                          <IconButton edge="end" onClick={() => removeDocument(doc.id)} size="small">
+                            <Delete />
+                          </IconButton>
+                        }
+                      >
+                        <ListItemText
+                          primary={doc.name}
+                          secondary={doc.content ? 
+                            `${doc.content.length} characters` : 
+                            'Processing...'}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </>
+              )}
+            </CardContent>
+          </Card>
+          
+          {/* Chat interface */}
+          <Card variant="outlined">
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Chat
+              </Typography>
+              
+              <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Type your message..."
+                  value={currentMessage}
+                  onChange={(e) => setCurrentMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  disabled={isProcessing}
+                  multiline
+                  maxRows={3}
+                />
+                <Button
+                  variant="contained"
+                  endIcon={<Send />}
+                  onClick={sendMessage}
+                  disabled={isProcessing || !currentMessage.trim()}
+                  sx={{ height: 'fit-content' }}
+                >
+                  Send
+                </Button>
+              </Box>
+              
+              <Button size="small" onClick={clearAll}>
+                Clear Chat
+              </Button>
+            </CardContent>
+          </Card>
+          
+          {/* Message display */}
+          {messages.length > 0 ? (
+            <Card variant="outlined">
+              <CardContent>
+                <List>
+                  {messages.map((message, index) => (
+                    <Box key={index}>
+                      <ListItem alignItems="flex-start">
+                        <Box sx={{ 
+                          display: 'flex', 
+                          flexDirection: 'column',
+                          width: '100%',
+                          p: 1,
+                          bgcolor: message.type === 'user' ? 
+                            (darkMode ? 'primary.dark' : 'primary.light') : 
+                            (darkMode ? 'grey.800' : 'grey.100'),
+                          borderRadius: 1
+                        }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                            <Typography variant="caption" fontWeight="bold">
+                              {message.type === 'user' ? 'You' : 'AI'}
+                            </Typography>
+                            <Typography variant="caption">
+                              {message.timestamp.toLocaleTimeString()}
+                            </Typography>
+                          </Box>
+                          <Typography variant="body1">
+                            {message.text}
+                          </Typography>
+                        </Box>
+                      </ListItem>
+                      {index < messages.length - 1 && <Divider sx={{ my: 1 }} />}
+                    </Box>
+                  ))}
+                </List>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card variant="outlined">
+              <CardContent sx={{ textAlign: 'center' }}>
+                <Typography variant="body1" color="textSecondary">
+                  No messages yet. Start a conversation!
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
+        </Box>
+
+        <Box sx={{ mt: 4, p: 2, bgcolor: darkMode ? '#1e1e1e' : '#f5f5f5', borderRadius: 1 }}>
+          <Typography variant="body2">
+            <strong>How it works:</strong> Upload text files to teach the AI. Then ask questions about the content.
+            Everything happens in your browser - no data is sent to servers.
+          </Typography>
+        </Box>
+      </Container>
+    </Box>
+  );
+};
+
+export default AutoReplySystem;

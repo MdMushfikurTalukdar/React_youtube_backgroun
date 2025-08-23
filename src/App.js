@@ -17,6 +17,9 @@ import FootballCareer from './pages/FootballCareer'; // <- 1. IMPORT THE NEW PAG
 import { GameProvider } from './context/GameContext'; // <- 2. IMPORT THE PROVIDER
 import ChatInterface from './pages/ChatInterface'; // Import the new ChatInterface
 import { AuthProvider } from './context/AuthContext'; // Import AuthProvider
+import AutoReplySystem from "./pages/AutoReplySystem";
+import BanglaAutoReplySystem from "./pages/BanglaAutoReplySystem";
+import ProtectedRoute from './component/ProtectedRoute';
 
 function App() {
   useEffect(() => {
@@ -103,6 +106,12 @@ function App() {
                 {/* 6. ADD THE NEW ROUTE FOR THE GAME */}
                 <Route path="/football-career" element={<FootballCareer />} />
                 <Route path="/chat" element={<ChatInterface />} /> {/* Add chat route */}
+                <Route path="/auto" element={
+                  <ProtectedRoute>
+                    <AutoReplySystem />
+                  </ProtectedRoute>
+                } />
+                <Route path="/bangla-auto" element={<BanglaAutoReplySystem />} />
             </Routes>
             </div>
         </Router>

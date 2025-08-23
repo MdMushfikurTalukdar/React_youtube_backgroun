@@ -24,6 +24,23 @@ const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Function to generate a secure token
+  const generateSecureToken = () => {
+    // Generate a random token using browser's crypto API if available
+    const randomBytes = new Uint8Array(32);
+    if (window.crypto && window.crypto.getRandomValues) {
+      window.crypto.getRandomValues(randomBytes);
+    } else {
+      // Fallback for older browsers
+      for (let i = 0; i < randomBytes.length; i++) {
+        randomBytes[i] = Math.floor(Math.random() * 256);
+      }
+    }
+    
+    // Convert to hex string
+    return Array.from(randomBytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -90,18 +107,27 @@ const Login = () => {
       );
       
       if (user) {
+        // Generate secure token
+        const authToken = generateSecureToken();
+        
+        // Store token in localStorage
+        localStorage.setItem('authToken', authToken);
+        // Also store token expiration (24 hours from now)
+        const expirationTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+        localStorage.setItem('tokenExpiration', expirationTime);
+        
         setAlert({
           open: true,
           severity: 'success',
           message: `Login successful! Welcome back, ${user.name}!`
         });
         
-        // Use the auth context to log in
-        login(user);
+        // Use the auth context to log in (pass the token)
+        login(user, authToken);
         
         // Redirect to chat page after a short delay
         setTimeout(() => {
-          navigate('/chat');
+          navigate('/auto');
         }, 1500);
       } else {
         setAlert({
@@ -193,12 +219,6 @@ const Login = () => {
           <Box sx={{ textAlign: 'center', mt: 3 }}>
             <Typography variant="body2">
               Don't have an account? <Link to="/register" style={{ textDecoration: 'none', fontWeight: 'bold' }}>Sign Up</Link>
-            </Typography>
-          </Box>
-          
-          <Box sx={{ mt: 2, p: 1, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
-            <Typography variant="caption" color="textSecondary">
-              For testing: try email: akkas@gmail.com, password: aaaaaa
             </Typography>
           </Box>
         </Box>
