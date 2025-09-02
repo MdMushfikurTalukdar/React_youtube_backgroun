@@ -20,6 +20,7 @@ import { AuthProvider } from './context/AuthContext'; // Import AuthProvider
 import AutoReplySystem from "./pages/AutoReplySystem";
 import BanglaAutoReplySystem from "./pages/BanglaAutoReplySystem";
 import ProtectedRoute from './component/ProtectedRoute';
+import TemplateGallery from "./pages/TemplateGallery";
 
 function App() {
   useEffect(() => {
@@ -112,6 +113,8 @@ function App() {
                   </ProtectedRoute>
                 } />
                 <Route path="/bangla-auto" element={<BanglaAutoReplySystem />} />
+                {/* <Route path="/templates" element={<TemplateGallery />} /> */}
+
             </Routes>
             </div>
         </Router>

@@ -24,9 +24,7 @@ import {
   useTheme,
   Avatar,
   Snackbar,
-  Alert,
-  Pagination,
-  PaginationItem
+  Alert
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
@@ -155,189 +153,37 @@ const WriterInfo = styled(Box)({
 
 const ContentNavigation = styled(Box)({
   display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
+  justifyContent: 'center',
   marginTop: '16px',
   marginBottom: '8px',
-  gap: '8px',
-});
-
-const PaginationContainer = styled(Box)({
-  display: 'flex',
-  justifyContent: 'center',
-  width: '100%',
-  marginTop: '8px',
 });
 
 const ContentNavButton = styled(Button)(({ theme, active }) => ({
-  minWidth: '32px',
-  height: '32px',
-  margin: '2px',
-  padding: '4px',
-  fontSize: '0.75rem',
-  color: active ? theme.palette.primary.contrastText : theme.palette.text.secondary,
-  backgroundColor: active ? theme.palette.primary.main : 'transparent',
+  minWidth: '40px',
+  margin: '0 4px',
+  color: active ? theme.palette.primary.main : theme.palette.text.secondary,
   border: active ? `1px solid ${theme.palette.primary.main}` : '1px solid #e0e0e0',
-  '&:hover': {
-    backgroundColor: active ? theme.palette.primary.dark : theme.palette.action.hover,
-  },
 }));
-
-const GoogleDocContent = ({ url }) => {
-  const [content, setContent] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchGoogleDoc = async () => {
-      try {
-        setLoading(true);
-        // Extract document ID from URL
-        const match = url.match(/\/d\/([^\/]+)/);
-        if (!match || !match[1]) {
-          throw new Error('Invalid Google Docs URL');
-        }
-        
-        const docId = match[1];
-        // ✅ Direct Google Docs export (no proxy needed)
-        const docUrl = `https://docs.google.com/document/d/${docId}/export?format=txt`;
-
-        const response = await fetch(docUrl);
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch document');
-        }
-        
-        const text = await response.text();
-        setContent(text);
-      } catch (err) {
-        console.error('Error fetching Google Doc:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGoogleDoc();
-  }, [url]);
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-        <CircularProgress size={24} />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Typography color="error">
-        Error loading document: {error}. 
-        <Button 
-          component="a" 
-          href={url} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          sx={{ ml: 1 }}
-        >
-          Open in new tab
-        </Button>
-      </Typography>
-    );
-  }
-
-  return (
-    <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
-      {content}
-    </Typography>
-  );
-};
 
 const BlogDetailDialog = ({ blog, open, onClose, onLike, onDislike, userReactions }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [playingVideo, setPlayingVideo] = useState(false);
   const [currentContentPart, setCurrentContentPart] = useState(0);
-  const [googleDocContent, setGoogleDocContent] = useState('');
-  const [loadingDoc, setLoadingDoc] = useState(false);
-  const [paginationPage, setPaginationPage] = useState(1);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-  // Fetch Google Docs content when blog changes
-  useEffect(() => {
-    const fetchGoogleDocContent = async () => {
-      if (!blog?.content) return;
-      
-      // Check if content is a Google Docs link
-      if (blog.content.trim().startsWith("https://docs.google.com/document")) {
-        try {
-          setLoadingDoc(true);
-          // Extract document ID from URL
-          const match = blog.content.match(/\/d\/([^\/]+)/);
-          if (!match || !match[1]) {
-            throw new Error('Invalid Google Docs URL');
-          }
-          
-          const docId = match[1];
-          const docUrl = `https://docs.google.com/document/d/${docId}/export?format=txt`;
-
-          const response = await fetch(docUrl);
-          if (!response.ok) {
-            throw new Error('Failed to fetch document');
-          }
-          
-          const text = await response.text();
-          setGoogleDocContent(text);
-        } catch (err) {
-          console.error('Error fetching Google Doc:', err);
-          setGoogleDocContent('Error loading document');
-        } finally {
-          setLoadingDoc(false);
-        }
-      }
-    };
-
-    fetchGoogleDocContent();
-  }, [blog]);
 
   // Reset states when blog changes
   useEffect(() => {
     setCurrentIndex(0);
     setPlayingVideo(false);
     setCurrentContentPart(0);
-    setGoogleDocContent('');
-    setPaginationPage(1);
   }, [blog]);
 
   // Split content into parts if %% is present
   const contentParts = useMemo(() => {
     if (!blog?.content) return [''];
-    
-    // If we have fetched Google Docs content, split it by %%
-    if (googleDocContent) {
-      const parts = googleDocContent.split(/(?:\s*%%\s*)+/).map(part => part.trim()).filter(part => part.length > 0);
-      console.log("Google Docs content parts:", parts);
-      return parts.length > 0 ? parts : [googleDocContent];
-    }
-    
-    // If it's a Google Docs URL but content hasn't loaded yet
-    if (blog.content.trim().startsWith("https://docs.google.com/document")) {
-      return loadingDoc ? ['Loading document...'] : ['Error loading document'];
-    }
-    
-    // For regular content, split by %% using improved regex
-    const parts = blog.content.split(/(?:\s*%%\s*)+/).map(part => part.trim()).filter(part => part.length > 0);
-    console.log("Regular content parts:", parts);
-    return parts.length > 0 ? parts : [blog.content];
-  }, [blog, googleDocContent, loadingDoc]);
-
-  // Pagination settings
-  const itemsPerPage = isMobile ? 8 : 15;
-  const pageCount = Math.ceil(contentParts.length / itemsPerPage);
-  const currentPageItems = useMemo(() => {
-    const startIndex = (paginationPage - 1) * itemsPerPage;
-    return contentParts.slice(startIndex, startIndex + itemsPerPage);
-  }, [contentParts, paginationPage, itemsPerPage]);
+    return blog.content.split('%%').map(part => part.trim());
+  }, [blog]);
 
   const handleNext = () => {
     setPlayingVideo(false);
@@ -361,33 +207,12 @@ const BlogDetailDialog = ({ blog, open, onClose, onLike, onDislike, userReaction
     setCurrentContentPart(prev => 
       prev === contentParts.length - 1 ? 0 : prev + 1
     );
-    // Update pagination page if needed
-    const newPage = Math.floor((currentContentPart + 1) / itemsPerPage) + 1;
-    if (newPage !== paginationPage && newPage <= pageCount) {
-      setPaginationPage(newPage);
-    }
   };
 
   const handlePrevContentPart = () => {
     setCurrentContentPart(prev => 
       prev === 0 ? contentParts.length - 1 : prev - 1
     );
-    // Update pagination page if needed
-    const newPage = Math.floor((currentContentPart - 1) / itemsPerPage) + 1;
-    if (newPage !== paginationPage && newPage >= 1) {
-      setPaginationPage(newPage);
-    }
-  };
-
-  const handlePageChange = (event, value) => {
-    setPaginationPage(value);
-  };
-
-  const handlePartClick = (index) => {
-    setCurrentContentPart(index);
-    // Update pagination page
-    const newPage = Math.floor(index / itemsPerPage) + 1;
-    setPaginationPage(newPage);
   };
 
   const getDirectImageUrl = (url) => {
@@ -428,7 +253,7 @@ const BlogDetailDialog = ({ blog, open, onClose, onLike, onDislike, userReaction
   if (!blog) return null;
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth sx={{ '& .MuiDialog-paper': { maxHeight: '90vh' } }}>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle>
         {blog.title || 'Untitled Blog'}
         {blog.category && (
@@ -441,7 +266,7 @@ const BlogDetailDialog = ({ blog, open, onClose, onLike, onDislike, userReaction
           </Box>
         )}
       </DialogTitle>
-      <DialogContent dividers sx={{ overflow: 'auto' }}>
+      <DialogContent dividers>
         {blog.images?.length > 0 && (
           <MediaContainer 
             sx={{ 
@@ -526,80 +351,35 @@ const BlogDetailDialog = ({ blog, open, onClose, onLike, onDislike, userReaction
           </WriterInfo>
         )}
         
-        {/* Content Navigation - Only show if we have multiple parts */}
+        {/* Content Navigation */}
         {contentParts.length > 1 && (
           <ContentNavigation>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '4px' }}>
-              {currentPageItems.map((_, index) => {
-                const globalIndex = (paginationPage - 1) * itemsPerPage + index;
-                return (
-                  <ContentNavButton 
-                    key={globalIndex}
-                    active={currentContentPart === globalIndex}
-                    onClick={() => handlePartClick(globalIndex)}
-                    size="small"
-                  >
-                    {globalIndex + 1}
-                  </ContentNavButton>
-                );
-              })}
-            </Box>
-            
-            {pageCount > 1 && (
-              <PaginationContainer>
-                <Pagination
-                  count={pageCount}
-                  page={paginationPage}
-                  onChange={handlePageChange}
-                  size="small"
-                  renderItem={(item) => (
-                    <PaginationItem
-                      {...item}
-                      sx={{
-                        margin: '0 2px',
-                        minWidth: '32px',
-                        height: '32px',
-                      }}
-                    />
-                  )}
-                />
-              </PaginationContainer>
-            )}
-            
-            <Box sx={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-              <IconButton 
-                onClick={handlePrevContentPart} 
+            <IconButton onClick={handlePrevContentPart} size="small">
+              <ChevronLeft />
+            </IconButton>
+            {contentParts.map((_, index) => (
+              <ContentNavButton 
+                key={index}
+                active={currentContentPart === index}
+                onClick={() => setCurrentContentPart(index)}
                 size="small"
-                disabled={contentParts.length <= 1}
               >
-                <ChevronLeft />
-              </IconButton>
-              <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
-                Part {currentContentPart + 1} of {contentParts.length}
-              </Typography>
-              <IconButton 
-                onClick={handleNextContentPart} 
-                size="small"
-                disabled={contentParts.length <= 1}
-              >
-                <ChevronRight />
-              </IconButton>
-            </Box>
+                {index + 1}
+              </ContentNavButton>
+            ))}
+            <IconButton onClick={handleNextContentPart} size="small">
+              <ChevronRight />
+            </IconButton>
           </ContentNavigation>
         )}
         
-        {/* Content Display */}
-        <Box sx={{ mt: 2 }}>
-          {loadingDoc ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-              <CircularProgress size={24} />
-            </Box>
-          ) : (
-            <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
-              {contentParts[currentContentPart] || 'No content available'}
-            </Typography>
-          )}
-        </Box>
+        <Typography 
+          variant="body1" 
+          paragraph
+          sx={{ whiteSpace: 'pre-line', mt: 2 }}
+        >
+          {contentParts[currentContentPart] || 'No content available'}
+        </Typography>
       </DialogContent>
       
       {/* Like/Dislike Section */}
@@ -649,9 +429,9 @@ const BlogPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const sheetId = '1gWAq3Hg8SX6VeBW9Fuos9I4EqoPmves6';
-        const response = await fetch(
-          `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`
+            const sheetId = '1gWAq3Hg8SX6VeBW9Fuos9I4EqoPmves6';
+            const response = await fetch(
+              `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`
         );
         
         if (!response.ok) {
@@ -663,20 +443,20 @@ const BlogPage = () => {
         const data = JSON.parse(jsonText);
         
         const rows = data.table.rows;
-        const formattedData = rows.map((row, index) => {
-          const obj = { id: index + 1 }; // Add a unique ID
-          data.table.cols.forEach((col, colIndex) => {
+        const formattedData = rows.map(row => {
+          const obj = {};
+          data.table.cols.forEach((col, index) => {
             if (col.label) {
               const key = col.label.toLowerCase().replace(/\s+/g, '');
-              if (key === 'images' && row.c[colIndex]?.v) {
-                const cleanValue = row.c[colIndex].v.toString().replace(/[()"]/g, '');
+              if (key === 'images' && row.c[index]?.v) {
+                const cleanValue = row.c[index].v.toString().replace(/[()"]/g, '');
                 obj[key] = cleanValue.split(',').map(url => url.trim()).filter(url => url);
-              } else if ((key === 'like' || key === 'dislike') && row.c[colIndex]?.v) {
+              } else if ((key === 'like' || key === 'dislike') && row.c[index]?.v) {
                 // Parse like and dislike counts as numbers
-                obj[key] = parseInt(row.c[colIndex].v) || 0;
+                obj[key] = parseInt(row.c[index].v) || 0;
               } else {
                 // Preserve newlines in content
-                obj[key] = row.c[colIndex]?.v ? row.c[colIndex].v.toString() : '';
+                obj[key] = row.c[index]?.v ? row.c[index].v.toString() : '';
               }
             }
           });
@@ -735,9 +515,9 @@ const BlogPage = () => {
   // Handle like action
   const handleLike = async (blogId) => {
     const currentReaction = userReactions[blogId];
-    const blog = blogData.find(b => b.id === blogId);
-    let newLikeCount = parseInt(blog?.like) || 0;
-    let newDislikeCount = parseInt(blog?.dislike) || 0;
+    const blog = blogData.find(b => b.id === blogId.toString());
+    let newLikeCount = parseInt(blog.like) || 0;
+    let newDislikeCount = parseInt(blog.dislike) || 0;
     
     if (currentReaction === 'like') {
       // If already liked, remove the like
@@ -754,7 +534,7 @@ const BlogPage = () => {
     // Update local state
     setBlogData(prevData => 
       prevData.map(blog => {
-        if (blog.id === blogId) {
+        if (blog.id === blogId.toString()) {
           return { 
             ...blog, 
             like: newLikeCount,
@@ -776,17 +556,15 @@ const BlogPage = () => {
     localStorage.setItem('blogReactions', JSON.stringify(newReactions));
     
     // Update the sheet
-    if (blog) {
-      await updateReactionInSheet(blogId, 'like', parseInt(blog.like) || 0);
-    }
+    await updateReactionInSheet(blogId, 'like', parseInt(blog.like) || 0);
   };
 
   // Handle dislike action
   const handleDislike = async (blogId) => {
     const currentReaction = userReactions[blogId];
-    const blog = blogData.find(b => b.id === blogId);
-    let newLikeCount = parseInt(blog?.like) || 0;
-    let newDislikeCount = parseInt(blog?.dislike) || 0;
+    const blog = blogData.find(b => b.id === blogId.toString());
+    let newLikeCount = parseInt(blog.like) || 0;
+    let newDislikeCount = parseInt(blog.dislike) || 0;
     
     if (currentReaction === 'dislike') {
       // If already disliked, remove the dislike
@@ -803,7 +581,7 @@ const BlogPage = () => {
     // Update local state
     setBlogData(prevData => 
       prevData.map(blog => {
-        if (blog.id === blogId) {
+        if (blog.id === blogId.toString()) {
           return { 
             ...blog, 
             like: newLikeCount,
@@ -825,9 +603,7 @@ const BlogPage = () => {
     localStorage.setItem('blogReactions', JSON.stringify(newReactions));
     
     // Update the sheet
-    if (blog) {
-      await updateReactionInSheet(blogId, 'dislike', parseInt(blog.dislike) || 0);
-    }
+    await updateReactionInSheet(blogId, 'dislike', parseInt(blog.dislike) || 0);
   };
 
   // Get unique categories
@@ -997,7 +773,7 @@ const BlogPage = () => {
                     {blog.category && (
                       <Chip 
                         label={blog.category} 
-                        size="small"
+                        size="small" 
                         color="primary"
                         sx={{ mb: 1 }}
                       />
