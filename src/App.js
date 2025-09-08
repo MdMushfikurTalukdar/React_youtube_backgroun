@@ -20,7 +20,7 @@ import { AuthProvider } from './context/AuthContext'; // Import AuthProvider
 import AutoReplySystem from "./pages/AutoReplySystem";
 import BanglaAutoReplySystem from "./pages/BanglaAutoReplySystem";
 import ProtectedRoute from './component/ProtectedRoute';
-import TemplateGallery from "./pages/TemplateGallery";
+// import TemplateGallery from "./pages/TemplateGallery";
 
 function App() {
   useEffect(() => {
@@ -38,18 +38,18 @@ function App() {
           //   src: '//pl27451996.profitableratecpm.com/04/9b/58/049b58bb8f039a484550d1e4845528c8.js',
           //   id: 'ad-script-1'
           // },
-          {
-            src: '//pl27453451.profitableratecpm.com/f0/3a/a0/f03aa033bc9cb942a5fb91344c04656b.js',
-            id: 'ad-script-2'
-          },
-          {
-            src: '//pl27453437.profitableratecpm.com/461148cde71dd8c3586e2a95af4919d5/invoke.js',
-            id: 'ad-script-3',
-            attributes: {
-              'async': 'true',
-              'data-cfasync': 'false'
-            }
-          }
+          // {
+          //   src: '//pl27453451.profitableratecpm.com/f0/3a/a0/f03aa033bc9cb942a5fb91344c04656b.js',
+          //   id: 'ad-script-2'
+          // },
+          // {
+          //   src: '//pl27453437.profitableratecpm.com/461148cde71dd8c3586e2a95af4919d5/invoke.js',
+          //   id: 'ad-script-3',
+          //   attributes: {
+          //     'async': 'true',
+          //     'data-cfasync': 'false'
+          //   }
+          // }
         ];
 
         // Load all scripts with error handling
